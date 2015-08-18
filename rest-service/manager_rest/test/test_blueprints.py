@@ -131,6 +131,8 @@ class BlueprintsTestCase(BaseServerTestCase):
             self.assertEqual(blueprint_id, response.json['id'])
         finally:
             fs.stop()
+        blueprint = self.client.blueprints.get(blueprint_id)
+        self.assertEqual('blueprint.yaml', blueprint.metadata['main_file'])
 
     def test_put_blueprint_from_unavailable_url(self):
         blueprint_id = 'new_blueprint_id'
@@ -208,6 +210,15 @@ class BlueprintsTestCase(BaseServerTestCase):
             'application_file_name query parameter was not passed'
         )
         self.assertEqual(put_blueprints_response.status_code, 400)
+
+    def test_blueprint_metadata(self):
+        blueprint_id = 'blueprint_metadata'
+        blueprint_file = 'blueprint_with_inputs.yaml'
+        blueprint_path = os.path.join(
+            self.get_blueprint_path('mock_blueprint'),
+            blueprint_file)
+        response = self.client.blueprints.upload(blueprint_path, blueprint_id)
+        self.assertEqual(blueprint_file, response.metadata['main_file'])
 
     def _test_put_blueprint(self, archive_func, archive_type):
         blueprint_id = 'new_blueprint_id'

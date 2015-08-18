@@ -24,7 +24,8 @@ class BlueprintState(object):
         'id': fields.String,
         'plan': fields.Raw,
         'created_at': fields.String,
-        'updated_at': fields.String
+        'updated_at': fields.String,
+        'metadata': fields.Nested({'main_file': fields.String})
     }
 
     def __init__(self, **kwargs):
@@ -32,6 +33,7 @@ class BlueprintState(object):
         self.id = kwargs['id']
         self.created_at = kwargs['created_at']
         self.updated_at = kwargs['updated_at']
+        self.metadata = kwargs['metadata']
 
 
 @swagger.model
