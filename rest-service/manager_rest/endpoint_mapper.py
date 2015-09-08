@@ -46,7 +46,10 @@ def setup_resources(api):
         'ProviderContext': 'provider/context',
         'Version': 'version',
         'EvaluateFunctions': 'evaluate/functions',
-        'Tokens': 'tokens'
+        'Tokens': 'tokens',
+        # 'Plugins': 'plugins',
+        # 'PluginsArchive': 'plugins/<string:plugin_id>/archive',
+        # 'PluginsId': 'plugins/<string:plugin-id>'
     }
 
     for resource, endpoint_suffix in resources_endpoints.iteritems():
@@ -55,6 +58,7 @@ def setup_resources(api):
 
 def _set_versioned_urls(api, resource_name, endpoint_suffix):
     for version in SUPPORTED_API_VERSIONS:
+        resource = None
         version_name, resources_impl = version
         if hasattr(resources_impl, resource_name):
             resource = getattr(resources_impl, resource_name)

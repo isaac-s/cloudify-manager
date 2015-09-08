@@ -39,6 +39,7 @@ class Config(object):
         self._securest_log_files_backup_count = None
         self._securest_userstore_driver = None
         self._securest_authentication_providers = []
+        self._file_server_uploaded_plugins_folder = None
 
     @property
     def db_address(self):
@@ -172,9 +173,17 @@ class Config(object):
     def auth_token_generator(self):
         return self._auth_token_generator
 
+    @property
+    def file_server_uploaded_plugins_folder(self):
+        return self._file_server_uploaded_plugins_folder
+
     @auth_token_generator.setter
     def auth_token_generator(self, value):
         self._auth_token_generator = value
+
+    @file_server_uploaded_plugins_folder.setter
+    def file_server_uploaded_plugins_folder(self, value):
+        self._file_server_uploaded_plugins_folder = value
 
     @property
     def securest_log_level(self):

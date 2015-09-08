@@ -26,6 +26,8 @@ from manager_rest import responses_v2 as responses
 from manager_rest import manager_exceptions
 from manager_rest.storage_manager import get_storage_manager
 from manager_rest.blueprints_manager import get_blueprints_manager
+from manager_rest import config
+from files import UploadedDataManager
 
 
 def verify_and_create_filters(fields):
@@ -221,6 +223,106 @@ class NodeInstances(resources.NodeInstances):
     @exceptions_handled
     @marshal_with(responses.NodeInstance.resource_fields)
     @verify_and_create_filters(models.DeploymentNodeInstance.fields)
+    def get(self, _include=None, filters=None):
+        """
+        List node instances
+        """
+        nodes = get_storage_manager().get_node_instances(include=_include,
+                                                         filters=filters)
+        return [responses.NodeInstance(**node.to_dict()) for node in nodes]
+
+
+class Plugins(UploadedDataManager):
+    """
+    POST = upload plugin.
+    GET = list uploaded plugins
+    """
+    @swagger.operation(
+        responseClass='List[{0}]'.format(responses.NodeInstance.__name__),
+        nickname="listPlugins",
+        notes='Returns a plugins list for the optionally provided '
+              'filter parameters: {0}'.format(models.Plugin.fields),
+        parameters=_create_filter_params_list_description(
+            models.Plugin.fields,
+            'plugins'
+        )
+    )
+    @exceptions_handled
+    @marshal_with(responses.Plugin.resource_fields)
+    @verify_and_create_filters(models.Plugin.fields)
+    def get(self, _include=None, filters=None):
+        """
+        List uploaded plugins
+        """
+        plugins = get_storage_manager().get_plugins(include=_include,
+                                                    filters=filters)
+        return [responses.Plugin(**plugin.to_dict()) for plugin in plugins]
+
+    @exceptions_handled
+    @marshal_with(responses.Plugin.resource_fields)
+    def post(self, plugin_id):
+        """
+        Upload a plugin
+        """
+
+    def _get_kind(self):
+        return 'plugin'
+
+    def _get_data_url_key(self):
+        return 'plugin_archive_url'
+
+    def _get_target_dir_path(self):
+        return config.instance().file_server_uploaded_plugins_folder
+
+    def _get_archive_type(self, archive_path):
+        return 'tar.gz'
+
+    def _prepare_and_process_doc(self, data_id, file_server_root,
+                                 archive_target_path):
+        return get_blueprints_manager().create_snapshot_model(data_id)
+
+
+class PluginsArchive(object):
+    """
+    GET = download previously uploaded plugin.
+    """
+    @swagger.operation(
+        responseClass='archive file',
+        nickname="downloadPlugin",
+        notes='Returns a node instances list for the optionally provided '
+              'filter parameters: {0}'
+        .format(models.Plugin.fields),
+        parameters=_create_filter_params_list_description(
+            models.Plugin.fields,
+            'plugin'
+        )
+    )
+    @exceptions_handled
+    @marshal_with(responses.Plugin.resource_fields)
+    def get(self, plugin_id=None):
+        """
+        download plugin by id.
+        """
+
+
+class PluginsId(object):
+    """
+    GET = download previously uploaded plugin.
+    """
+    @swagger.operation(
+        responseClass='List[{0}]'.format(responses.NodeInstance.__name__),
+        nickname="listNodeInstances",
+        notes='Returns a node instances list for the optionally provided '
+              'filter parameters: {0}'
+        .format(models.DeploymentNodeInstance.fields),
+        parameters=_create_filter_params_list_description(
+            models.DeploymentNodeInstance.fields,
+            'node instances'
+        )
+    )
+    @exceptions_handled
+    @marshal_with(responses.Plugin.resource_fields)
+    @verify_and_create_filters(models.Plugin.fields)
     def get(self, _include=None, filters=None):
         """
         List node instances

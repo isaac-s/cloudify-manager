@@ -25,11 +25,13 @@ from manager_rest.models import (BlueprintState,
                                  Execution,
                                  DeploymentNode,
                                  DeploymentNodeInstance,
-                                 ProviderContext)
+                                 ProviderContext,
+                                 Plugin)
 
 STORAGE_INDEX_NAME = 'cloudify_storage'
 NODE_TYPE = 'node'
 NODE_INSTANCE_TYPE = 'node_instance'
+PLUGINS_TYPE = 'plugins'
 BLUEPRINT_TYPE = 'blueprint'
 DEPLOYMENT_TYPE = 'deployment'
 DEPLOYMENT_MODIFICATION_TYPE = 'deployment_modification'
@@ -227,6 +229,12 @@ class ESStorageManager(object):
                                     filters=filters,
                                     include=include)
 
+    def get_plugins(self, include=None, filters=None):
+        return self._get_items_list(PLUGINS_TYPE,
+                                    Plugin,
+                                    filters=filters,
+                                    include=include)
+
     def get_nodes(self, include=None, filters=None):
         return self._get_items_list(NODE_TYPE,
                                     DeploymentNode,
@@ -270,6 +278,10 @@ class ESStorageManager(object):
     def put_execution(self, execution_id, execution):
         self._put_doc_if_not_exists(EXECUTION_TYPE, str(execution_id),
                                     execution.to_dict())
+
+    def put_plugin(self, plugin_id, plugin):
+        self._put_doc_if_not_exists(PLUGINS_TYPE, str(plugin_id),
+                                    plugin.to_dict())
 
     def put_node(self, node):
         storage_node_id = self._storage_node_id(node.deployment_id, node.id)
