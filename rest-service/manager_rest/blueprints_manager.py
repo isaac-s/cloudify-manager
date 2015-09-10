@@ -72,6 +72,9 @@ class BlueprintsManager(object):
     def get_execution(self, execution_id, include=None):
         return self.sm.get_execution(execution_id, include=include)
 
+    def get_plugin(self, plugin_id, include=None):
+        return self.sm.get_plugin(plugin_id, include=include)
+
     def update_execution_status(self, execution_id, status, error):
 
         if self._get_transient_deployment_workers_mode_config()['enabled'] and\
@@ -465,6 +468,12 @@ class BlueprintsManager(object):
         self._create_deployment_node_instances(deployment_id,
                                                added_node_instances)
         return modification
+
+    def create_plugin_model(self, plugin_id):
+        now = str(datetime.now())
+        new_plugin = models.Plugin(id=plugin_id, uploaded_at=now)
+        self.sm.put_plugin(plugin_id, new_plugin)
+        return new_plugin
 
     def finish_deployment_modification(self, modification_id):
         modification = self.sm.get_deployment_modification(modification_id)

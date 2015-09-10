@@ -267,6 +267,12 @@ class ESStorageManager(object):
                                              Execution,
                                              fields=include)
 
+    def get_plugin(self, plugin_id, include=None):
+        return self._get_doc_and_deserialize(PLUGINS_TYPE,
+                                             plugin_id,
+                                             Plugin,
+                                             fields=include)
+
     def put_blueprint(self, blueprint_id, blueprint):
         self._put_doc_if_not_exists(BLUEPRINT_TYPE, str(blueprint_id),
                                     blueprint.to_dict())

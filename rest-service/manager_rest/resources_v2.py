@@ -22,6 +22,7 @@ from manager_rest import resources
 from manager_rest.resources import (marshal_with,
                                     exceptions_handled)
 from manager_rest.resources import (verify_and_convert_bool,
+                                    _make_streaming_response,
                                     _replace_workflows_field_for_deployment_response)  # noqa
 from manager_rest import models
 from manager_rest import responses_v2 as responses
@@ -29,8 +30,11 @@ from manager_rest import manager_exceptions
 from manager_rest.storage_manager import get_storage_manager
 from manager_rest.blueprints_manager import get_blueprints_manager
 from manager_rest import config
+from manager_rest import archiving
 from files import UploadedDataManager
 from flask_securest.rest_security import SecuredResource
+
+SUPPORTED_ARCHIVE_TYPES = ['zip', 'tar', 'tar.gz', 'tar.bz2']
 
 
 def verify_and_create_filters(fields):
@@ -274,7 +278,7 @@ class UploadedPluginsManager(UploadedDataManager):
         return config.instance().file_server_uploaded_plugins_folder
 
     def _get_archive_type(self, archive_path):
-        return 'tar.gz'
+        return archiving.get_archive_type(archive_path)
 
     def _prepare_and_process_doc(self, data_id, file_server_root,
                                  archive_target_path):
@@ -291,11 +295,40 @@ class PluginsArchive(SecuredResource):
     )
     @exceptions_handled
     @marshal_with(responses.Plugin.resource_fields)
-    def get(self, plugin_id=None):
+    def get(self, plugin_id):
         """
-        download plugin by id.
+        Download plugin archive
         """
-        return ''
+        # Verify plugin exists.
+        get_blueprints_manager().get_plugin(plugin_id, {'id'})
+
+        for arc_type in SUPPORTED_ARCHIVE_TYPES:
+            # attempting to find the archive file on the file system
+            local_path = os.path.join(
+                config.instance().file_server_root,
+                config.instance().file_server_uploaded_plugins_folder,
+                plugin_id,
+                '{0}.{1}'.format(plugin_id, arc_type))
+
+            if os.path.isfile(local_path):
+                archive_type = arc_type
+                break
+        else:
+            raise RuntimeError("Could not find blueprint's archive; "
+                               "Blueprint ID: {0}".format(plugin_id))
+
+        plugin_path = '{0}/{1}/{2}/{2}.{3}'.format(
+            config.instance().file_server_resources_uri,
+            config.instance().file_server_uploaded_plugins_folder,
+            plugin_id,
+            archive_type)
+
+        return _make_streaming_response(
+            plugin_id,
+            plugin_path,
+            os.path.getsize(local_path),
+            archive_type
+        )
 
     @exceptions_handled
     @marshal_with(responses.Plugin.resource_fields)
@@ -320,14 +353,12 @@ class PluginsId(SecuredResource):
     )
     @exceptions_handled
     @marshal_with(responses.Plugin.resource_fields)
-    @verify_and_create_filters(models.Plugin.fields)
-    def get(self, _include=None, filters=None):
+    def get(self, plugin_id, _include=None):
         """
-        List plugins
+        Returns plugin by ID
         """
-        plugins = get_storage_manager().get_plugins(include=_include,
-                                                    filters=filters)
-        return [responses.Plugin(**plugin.to_dict()) for plugin in plugins]
+        plugin = get_storage_manager().get_plugin(plugin_id, include=_include)
+        return responses.Plugin(**plugin.to_dict())
 
     @exceptions_handled
     @marshal_with(responses.Plugin.resource_fields)

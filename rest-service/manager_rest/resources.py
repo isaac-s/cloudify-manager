@@ -145,6 +145,19 @@ def verify_and_convert_bool(attribute_name, str_bool):
         '{0} must be <true/false>, got {1}'.format(attribute_name, str_bool))
 
 
+def _make_streaming_response(res_id, res_path, content_length, archive_type):
+    response = make_response()
+    response.headers['Content-Description'] = 'File Transfer'
+    response.headers['Cache-Control'] = 'no-cache'
+    response.headers['Content-Type'] = 'application/octet-stream'
+    response.headers['Content-Disposition'] = \
+        'attachment; filename={0}.{1}'.format(res_id, archive_type)
+    response.headers['Content-Length'] = content_length
+    response.headers['X-Accel-Redirect'] = res_path
+    response.headers['X-Accel-Buffering'] = 'yes'
+    return response
+
+
 def _replace_workflows_field_for_deployment_response(deployment_dict):
     deployment_workflows = deployment_dict['workflows']
     if deployment_workflows is not None:

@@ -27,11 +27,9 @@ from flask_restful_swagger import swagger
 class Plugin(object):
     resource_fields = {
         'id': fields.String,
-        'uploaded_at': fields.String,
-        'version': fields.String
+        'uploaded_at': fields.String
     }
 
     def __init__(self, **kwargs):
         self.id = kwargs['id']
         self.uploaded_at = kwargs['uploaded_at']
-        self.version = kwargs['version']

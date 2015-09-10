@@ -32,6 +32,7 @@ from cloudify_rest_client.client import HTTPClient
 STORAGE_MANAGER_MODULE_NAME = 'file_storage_manager'
 FILE_SERVER_PORT = 53229
 FILE_SERVER_BLUEPRINTS_FOLDER = 'blueprints'
+FILE_SERVER_PLUGINS_FOLDER = 'plugins'
 FILE_SERVER_UPLOADED_BLUEPRINTS_FOLDER = 'uploaded-blueprints'
 FILE_SERVER_RESOURCES_URI = '/resources'
 LATEST_API_VERSION = 'v2'
@@ -207,6 +208,8 @@ class BaseServerTestCase(unittest.TestCase):
             FILE_SERVER_PORT)
         test_config.file_server_blueprints_folder = \
             FILE_SERVER_BLUEPRINTS_FOLDER
+        test_config.file_server_uploaded_plugins_folder = \
+            FILE_SERVER_PLUGINS_FOLDER
         test_config.file_server_uploaded_blueprints_folder = \
             FILE_SERVER_UPLOADED_BLUEPRINTS_FOLDER
         test_config.file_server_resources_uri = FILE_SERVER_RESOURCES_URI
