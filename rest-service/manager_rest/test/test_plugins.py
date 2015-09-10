@@ -14,6 +14,7 @@
 #  * limitations under the License.
 import tempfile
 import os
+import uuid
 
 from base_test import BaseServerTestCase
 from cloudify_rest_client.exceptions import CloudifyClientError
@@ -30,20 +31,21 @@ class PluginsTest(BaseServerTestCase):
     """
     Test plugins upload and download.
     """
-    def _upload_plugin(self, plugin_id):
+    def _upload_plugin(self,):
+        plugin_id = uuid.uuid4()
         temp_file_path = self._generate_archive_file()
         return self.put_file('/plugins/{0}/archive'.format(plugin_id),
                              temp_file_path)
 
     def test_get_plugin_by_id(self):
-        put_plugin_response = self._upload_plugin('plugin_id').json
+        put_plugin_response = self._upload_plugin().json
         get_plugin_by_id_response = self.client.plugins.get(
             put_plugin_response['id'])
         self.assertEquals(put_plugin_response,
                           get_plugin_by_id_response)
 
     def test_delete_plugin(self):
-        put_plugin_response = self._upload_plugin('plugin_id').json
+        put_plugin_response = self._upload_plugin().json
         plugins = self.client.plugins.list()
         self.assertEqual(1, len(plugins), 'expecting 1 plugin result, '
                                           'got {0}'.format(len(plugins)))
@@ -56,8 +58,8 @@ class PluginsTest(BaseServerTestCase):
                                           'got {0}'.format(len(plugins)))
 
     def test_plugins_list_with_filters(self):
-        self._upload_plugin('plugin_id').json
-        sec_plugin_id = self._upload_plugin('plugin_id2').json['id']
+        self._upload_plugin().json
+        sec_plugin_id = self._upload_plugin().json['id']
         filter_field = {'id': sec_plugin_id}
         response = self.client.plugins.list(**filter_field)
 
@@ -77,8 +79,8 @@ class PluginsTest(BaseServerTestCase):
             self.assert_bad_parameter_error(models.Plugin.fields, e)
 
     def test_plugins_list_no_filters(self):
-        first_plugin_response = self._upload_plugin('plugin_id').json
-        sec_plugin_response = self._upload_plugin('plugin_id2').json
+        first_plugin_response = self._upload_plugin().json
+        sec_plugin_response = self._upload_plugin().json
         response = self.client.plugins.list()
         self.assertEqual(2, len(response), 'expecting 2 plugin results, '
                                            'got {0}'.format(len(response)))
