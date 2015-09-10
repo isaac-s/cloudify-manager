@@ -34,8 +34,10 @@ class PluginsTest(BaseServerTestCase):
     def _upload_plugin(self,):
         plugin_id = uuid.uuid4()
         temp_file_path = self._generate_archive_file()
-        return self.put_file('/plugins/{0}/archive'.format(plugin_id),
-                             temp_file_path)
+        response = self.put_file('/plugins/{0}/archive'.format(plugin_id),
+                                 temp_file_path)
+        os.remove(temp_file_path)
+        return response
 
     def test_get_plugin_by_id(self):
         put_plugin_response = self._upload_plugin().json
@@ -85,14 +87,13 @@ class PluginsTest(BaseServerTestCase):
         self.assertEqual(2, len(response), 'expecting 2 plugin results, '
                                            'got {0}'.format(len(response)))
 
-        expected_res = {'id': first_plugin_response['id'],
-                        'uploaded_at': first_plugin_response['uploaded_at'],
-                        'id': sec_plugin_response['id'],
-                        'uploaded_at': sec_plugin_response['uploaded_at']}
-        self.assertDictContainsSubset(expected_res, response[0],
-                                      'expecting results having '
-                                      'values {0}, got {1}'
-                                      .format(expected_res, response[0]))
+        for plugin in response:
+            self.assertIn(plugin['id'],
+                          (first_plugin_response['id'],
+                           sec_plugin_response['id']))
+            self.assertIn(plugin['uploaded_at'],
+                          (first_plugin_response['uploaded_at'],
+                           sec_plugin_response['uploaded_at']))
 
     def assert_bad_parameter_error(self, fields, e):
         self.assertEqual(400, e.status_code)
