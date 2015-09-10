@@ -27,6 +27,23 @@ from manager_rest.storage_manager import get_storage_manager
 from manager_rest.blueprints_manager import get_blueprints_manager
 
 
+def paginate_list(list_of_objects, offset=0, size=100):
+    list_of_objects = list_of_objects[offset:]
+    list_of_objects = list_of_objects[:size]
+    return list_of_objects
+
+
+def paginate(func):
+    def wrapper(*args, **kwargs):
+        result = func(*args, **kwargs)
+        offset = int(request.args.get("_offset"))
+        page_size = int(request.args.get("_size"))
+        temp = paginate_list(list_of_objects=result,
+                             offset=offset, size=page_size)
+        return temp
+    return wrapper
+
+
 def verify_and_create_filters(fields):
     """
     Decorator for extracting filter parameters from the request arguments and
@@ -62,7 +79,7 @@ def _create_filter_params_list_description(parameters, list_type):
 
 
 class Blueprints(resources.Blueprints):
-
+    @paginate
     @swagger.operation(
         responseClass='List[{0}]'.format(responses_v2.BlueprintState.__name__),
         nickname="list",
@@ -165,7 +182,7 @@ class BlueprintsId(resources.BlueprintsId):
 
 
 class Executions(resources.Executions):
-
+    @paginate
     @swagger.operation(
         responseClass='List[{0}]'.format(responses_v2.Execution.__name__),
         nickname="list",
@@ -205,7 +222,7 @@ class Executions(resources.Executions):
 
 
 class Deployments(resources.Deployments):
-
+    @paginate
     @swagger.operation(
         responseClass='List[{0}]'.format(responses_v2.Deployment.__name__),
         nickname="list",
@@ -229,6 +246,7 @@ class Deployments(resources.Deployments):
 
 
 class DeploymentModifications(resources.DeploymentModifications):
+    @paginate
     @swagger.operation(
         responseClass='List[{0}]'.format(
             responses_v2.DeploymentModification.__name__),
@@ -254,7 +272,7 @@ class DeploymentModifications(resources.DeploymentModifications):
 
 
 class Nodes(resources.Nodes):
-
+    @paginate
     @swagger.operation(
         responseClass='List[{0}]'.format(responses_v2.Node.__name__),
         nickname="listNodes",
@@ -278,7 +296,7 @@ class Nodes(resources.Nodes):
 
 
 class NodeInstances(resources.NodeInstances):
-
+    @paginate
     @swagger.operation(
         responseClass='List[{0}]'.format(responses_v2.NodeInstance.__name__),
         nickname="listNodeInstances",
