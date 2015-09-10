@@ -234,3 +234,39 @@ class ResourceListFiltersTestCase(BaseListTest):
             self.fail('Expecting \'CloudifyClientError\' to be raised')
         except CloudifyClientError as e:
             self.assert_bad_parameter_error(models.BlueprintState.fields, e)
+
+    def test_plugins_list_with_filters(self):
+        self._upload_plugin().json
+        sec_plugin_id = self._upload_plugin().json['id']
+        filter_field = {'id': sec_plugin_id}
+        response = self.client.plugins.list(**filter_field)
+
+        self.assertEqual(len(response), 1, 'expecting 1 plugin result, '
+                                           'got {0}'.format(len(response)))
+        self.assertDictContainsSubset(filter_field, response[0],
+                                      'expecting filtered results having '
+                                      'filters {0}, got {1}'
+                                      .format(filter_field, response[0]))
+
+    def test_plugins_list_non_existing_filters(self):
+        filter_fields = {'non_existing_field': 'just_some_value'}
+        try:
+            self.client.plugins.list(**filter_fields)
+            self.fail('Expecting \'CloudifyClientError\' to be raised')
+        except CloudifyClientError as e:
+            self.assert_bad_parameter_error(models.Plugin.fields, e)
+
+    def test_plugins_list_no_filters(self):
+        first_plugin_response = self._upload_plugin().json
+        sec_plugin_response = self._upload_plugin().json
+        response = self.client.plugins.list()
+        self.assertEqual(2, len(response), 'expecting 2 plugin results, '
+                                           'got {0}'.format(len(response)))
+
+        for plugin in response:
+            self.assertIn(plugin['id'],
+                          (first_plugin_response['id'],
+                           sec_plugin_response['id']))
+            self.assertIn(plugin['uploaded_at'],
+                          (first_plugin_response['uploaded_at'],
+                           sec_plugin_response['uploaded_at']))

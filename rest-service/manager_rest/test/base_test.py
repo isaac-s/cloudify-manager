@@ -15,6 +15,7 @@
 
 import unittest
 import json
+import uuid
 import urllib
 import urllib2
 import tempfile
@@ -355,6 +356,18 @@ class BaseServerTestCase(unittest.TestCase):
                                                     deployment_id,
                                                     inputs=inputs)
         return blueprint_id, deployment.id, blueprint_response, deployment
+
+    def _upload_plugin(self, plugin_id=None, archive_type=None):
+        temp_file_path = self._generate_archive_file(archive_type=archive_type)
+        response = self.put_file('/plugins/{plugin_id}'.format(
+            plugin_id=plugin_id or uuid.uuid4()), temp_file_path)
+        os.remove(temp_file_path)
+        return response
+
+    def _generate_archive_file(self, archive_type=None):
+        archive_file_path = tempfile.mktemp(suffix=archive_type or 'tar.gz')
+        archiving.make_targzfile(archive_file_path, os.path.realpath(__file__))
+        return archive_file_path
 
     def wait_for_url(self, url, timeout=5):
         end = time.time() + timeout
