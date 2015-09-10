@@ -365,7 +365,7 @@ class PluginsId(SecuredResource):
     def delete(self, plugin_id):
         path = _get_plugin_path(plugin_id)
         shutil.rmtree(path, ignore_errors=True)
-        plugin = get_blueprints_manager().delete_plugin(plugin_id)
+        plugin = get_storage_manager().delete_plugin(plugin_id)
         return plugin, 200
 
 

@@ -307,6 +307,10 @@ class ESStorageManager(object):
         return self._delete_doc(BLUEPRINT_TYPE, blueprint_id,
                                 BlueprintState)
 
+    def delete_plugin(self, plugin_id):
+        return self._delete_doc(PLUGINS_TYPE, plugin_id,
+                                Plugin)
+
     def update_execution_status(self, execution_id, status, error):
         update_doc_data = {'status': status,
                            'error': error}

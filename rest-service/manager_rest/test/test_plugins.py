@@ -22,6 +22,9 @@ from manager_rest import archiving
 from manager_rest import models
 from manager_rest import manager_exceptions
 
+# todo(adaml): test put 2 plugins with same id,
+# test supported types
+
 
 class PluginsTest(BaseServerTestCase):
     """
@@ -33,17 +36,30 @@ class PluginsTest(BaseServerTestCase):
                              temp_file_path)
 
     def test_get_plugin_by_id(self):
-        self.put_plugin_response = self._upload_plugin('plugin_id').json
+        put_plugin_response = self._upload_plugin('plugin_id').json
         get_plugin_by_id_response = self.client.plugins.get(
-            self.put_plugin_response['id'])
-        self.assertEquals(self.put_plugin_response,
+            put_plugin_response['id'])
+        self.assertEquals(put_plugin_response,
                           get_plugin_by_id_response)
+
+    def test_delete_plugin(self):
+        put_plugin_response = self._upload_plugin('plugin_id').json
+        plugins = self.client.plugins.list()
+        self.assertEqual(1, len(plugins), 'expecting 1 plugin result, '
+                                          'got {0}'.format(len(plugins)))
+        get_plugin_by_id_response = self.client.plugins.delete(
+            put_plugin_response['id'])
+        self.assertEquals(put_plugin_response,
+                          get_plugin_by_id_response)
+        plugins = self.client.plugins.list()
+        self.assertEqual(0, len(plugins), 'expecting 0 plugin result, '
+                                          'got {0}'.format(len(plugins)))
 
     def test_plugins_list_with_filters(self):
         self._upload_plugin('plugin_id').json
         sec_plugin_id = self._upload_plugin('plugin_id2').json['id']
         filter_field = {'id': sec_plugin_id}
-        response = self.get('/plugins', query_params=filter_field).json
+        response = self.client.plugins.list(**filter_field)
 
         self.assertEqual(len(response), 1, 'expecting 1 plugin result, '
                                            'got {0}'.format(len(response)))
@@ -63,7 +79,7 @@ class PluginsTest(BaseServerTestCase):
     def test_plugins_list_no_filters(self):
         first_plugin_response = self._upload_plugin('plugin_id').json
         sec_plugin_response = self._upload_plugin('plugin_id2').json
-        response = self.get('/plugins', query_params=None).json
+        response = self.client.plugins.list()
         self.assertEqual(2, len(response), 'expecting 2 plugin results, '
                                            'got {0}'.format(len(response)))
 

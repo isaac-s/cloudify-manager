@@ -326,6 +326,9 @@ class FileStorageManager(object):
     def delete_blueprint(self, blueprint_id):
         return self._delete_object(blueprint_id, BLUEPRINTS, 'Blueprint')
 
+    def delete_plugin(self, plugin_id):
+        return self._delete_object(plugin_id, PLUGINS, 'Plugin')
+
     def delete_deployment(self, deployment_id):
         data = self._load_data()
         for instance in data[NODE_INSTANCES].values():

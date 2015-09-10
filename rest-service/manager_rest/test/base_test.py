@@ -114,6 +114,11 @@ class MockHTTPClient(HTTPClient):
                                       headers=headers,
                                       data=body,
                                       query_string=build_query_string(params))
+        elif 'delete' in requests_method.__name__:
+            response = self.app.delete(self.version_url(request_url),
+                                       headers=headers,
+                                       data=body,
+                                       query_string=build_query_string(params))
         else:
             raise NotImplemented()
 
