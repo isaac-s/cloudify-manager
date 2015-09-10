@@ -34,7 +34,7 @@ class PluginsTest(BaseServerTestCase):
     def _upload_plugin(self,):
         plugin_id = uuid.uuid4()
         temp_file_path = self._generate_archive_file()
-        response = self.put_file('/plugins/{0}/archive'.format(plugin_id),
+        response = self.put_file('/plugins/{0}'.format(plugin_id),
                                  temp_file_path)
         os.remove(temp_file_path)
         return response

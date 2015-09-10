@@ -330,11 +330,6 @@ class PluginsArchive(SecuredResource):
             archive_type
         )
 
-    @exceptions_handled
-    @marshal_with(responses.Plugin.resource_fields)
-    def put(self, plugin_id):
-        return UploadedPluginsManager().receive_uploaded_data(plugin_id)
-
 
 class PluginsId(SecuredResource):
     """
@@ -359,6 +354,11 @@ class PluginsId(SecuredResource):
         """
         plugin = get_storage_manager().get_plugin(plugin_id, include=_include)
         return responses.Plugin(**plugin.to_dict())
+
+    @exceptions_handled
+    @marshal_with(responses.Plugin.resource_fields)
+    def put(self, plugin_id):
+        return UploadedPluginsManager().receive_uploaded_data(plugin_id)
 
     @exceptions_handled
     @marshal_with(responses.Plugin.resource_fields)
