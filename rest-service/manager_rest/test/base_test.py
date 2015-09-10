@@ -147,6 +147,7 @@ class BaseServerTestCase(unittest.TestCase):
         client.manager.api = mock_http_client
         client.evaluate.api = mock_http_client
         client.tokens.api = mock_http_client
+        client.plugins.api = mock_http_client
 
         return client
 

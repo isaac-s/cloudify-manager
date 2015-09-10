@@ -50,7 +50,7 @@ class UploadedDataManager(object):
         if url_key in request.args:
             if request.data or 'Transfer-Encoding' in request.headers:
                 raise manager_exceptions.BadParametersError(
-                    "Can't pass both a snapshot URL via query parameters "
+                    "Can't pass both a {0} URL via query parameters "
                     "and {0} data via the request body at the same time"
                     .format(self._get_kind()))
             data_url = request.args[url_key]

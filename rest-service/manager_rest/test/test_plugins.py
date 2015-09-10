@@ -13,14 +13,29 @@
 #  * See the License for the specific language governing permissions and
 #  * limitations under the License.
 import tempfile
+import os
+
+from manager_rest import archiving
 
 from base_test import BaseServerTestCase
 
 
 class PluginsTest(BaseServerTestCase):
     """
-    Test plugins updload and download.
+    Test plugins upload and download.
     """
+    def setUp(self):
+        super(PluginsTest, self).setUp()
+        self.plugin_id = self._upload_plugin()
+
+    def _upload_plugin(self):
+        plugin_id = 'plugin_id'
+        temp_file = tempfile.mktemp()
+        archiving.make_targzfile(temp_file, os.path.realpath(__file__))
+        self.put_file('/plugins/{0}/archive'.format(plugin_id), temp_file)
+        # self.client.plugins.download('lll', temp_file)
+        # self.client.plugins.upload(temp_file, plugin_id)
+        return plugin_id
 
     def test_plugins_upload(self):
         file_path = self._generate_archive_file()

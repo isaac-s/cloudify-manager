@@ -13,8 +13,10 @@
 #  * See the License for the specific language governing permissions and
 #  * limitations under the License.
 #
-from flask import request
 from flask_restful_swagger import swagger
+from flask import request
+import shutil
+import os
 
 from manager_rest import resources
 from manager_rest.resources import (marshal_with,
@@ -28,6 +30,7 @@ from manager_rest.storage_manager import get_storage_manager
 from manager_rest.blueprints_manager import get_blueprints_manager
 from manager_rest import config
 from files import UploadedDataManager
+from flask_securest.rest_security import SecuredResource
 
 
 def verify_and_create_filters(fields):
@@ -232,7 +235,7 @@ class NodeInstances(resources.NodeInstances):
         return [responses.NodeInstance(**node.to_dict()) for node in nodes]
 
 
-class Plugins(UploadedDataManager):
+class Plugins(SecuredResource):
     """
     POST = upload plugin.
     GET = list uploaded plugins
@@ -258,12 +261,8 @@ class Plugins(UploadedDataManager):
                                                     filters=filters)
         return [responses.Plugin(**plugin.to_dict()) for plugin in plugins]
 
-    @exceptions_handled
-    @marshal_with(responses.Plugin.resource_fields)
-    def post(self, plugin_id):
-        """
-        Upload a plugin
-        """
+
+class UploadedPluginsManager(UploadedDataManager):
 
     def _get_kind(self):
         return 'plugin'
@@ -279,23 +278,16 @@ class Plugins(UploadedDataManager):
 
     def _prepare_and_process_doc(self, data_id, file_server_root,
                                  archive_target_path):
-        return get_blueprints_manager().create_snapshot_model(data_id)
+        return get_blueprints_manager().create_plugin_model(data_id)
 
 
-class PluginsArchive(object):
+class PluginsArchive(SecuredResource):
     """
     GET = download previously uploaded plugin.
     """
     @swagger.operation(
         responseClass='archive file',
         nickname="downloadPlugin",
-        notes='Returns a node instances list for the optionally provided '
-              'filter parameters: {0}'
-        .format(models.Plugin.fields),
-        parameters=_create_filter_params_list_description(
-            models.Plugin.fields,
-            'plugin'
-        )
     )
     @exceptions_handled
     @marshal_with(responses.Plugin.resource_fields)
@@ -303,9 +295,15 @@ class PluginsArchive(object):
         """
         download plugin by id.
         """
+        return ''
+
+    @exceptions_handled
+    @marshal_with(responses.Plugin.resource_fields)
+    def put(self, plugin_id):
+        return UploadedPluginsManager().receive_uploaded_data(plugin_id)
 
 
-class PluginsId(object):
+class PluginsId(SecuredResource):
     """
     GET = download previously uploaded plugin.
     """
@@ -325,8 +323,24 @@ class PluginsId(object):
     @verify_and_create_filters(models.Plugin.fields)
     def get(self, _include=None, filters=None):
         """
-        List node instances
+        List plugins
         """
-        nodes = get_storage_manager().get_node_instances(include=_include,
-                                                         filters=filters)
-        return [responses.NodeInstance(**node.to_dict()) for node in nodes]
+        plugins = get_storage_manager().get_plugins(include=_include,
+                                                    filters=filters)
+        return [responses.Plugin(**plugin.to_dict()) for plugin in plugins]
+
+    @exceptions_handled
+    @marshal_with(responses.Plugin.resource_fields)
+    def delete(self, plugin_id):
+        path = _get_plugin_path(plugin_id)
+        shutil.rmtree(path, ignore_errors=True)
+        plugin = get_blueprints_manager().delete_plugin(plugin_id)
+        return plugin, 200
+
+
+def _get_plugin_path(plugin_id):
+    return os.path.join(
+        config.instance().file_server_root,
+        config.instance().file_server_uploaded_plugins_folder,
+        plugin_id
+    )
