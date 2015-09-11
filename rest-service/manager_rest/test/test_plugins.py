@@ -16,6 +16,7 @@ from base_test import BaseServerTestCase
 
 from cloudify_rest_client.exceptions import CloudifyClientError
 
+
 class PluginsTest(BaseServerTestCase):
     """
     Test plugins upload and download.
