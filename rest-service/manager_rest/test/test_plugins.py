@@ -14,6 +14,7 @@
 #  * limitations under the License.
 from base_test import BaseServerTestCase
 
+from cloudify_rest_client.exceptions import CloudifyClientError
 
 class PluginsTest(BaseServerTestCase):
     """
@@ -25,6 +26,13 @@ class PluginsTest(BaseServerTestCase):
             put_plugin_response['id'])
         self.assertEquals(put_plugin_response,
                           get_plugin_by_id_response)
+
+    def test_get_plugin_not_found(self):
+        try:
+            self.client.plugins.get('DUMMY_PLUGIN_ID')
+        except CloudifyClientError as e:
+            self.assertEquals('Plugin DUMMY_PLUGIN_ID not found', e.message)
+            self.assertEquals(404, e.status_code)
 
     def test_delete_plugin(self):
         put_plugin_response = self._upload_plugin().json
@@ -39,18 +47,12 @@ class PluginsTest(BaseServerTestCase):
         self.assertEqual(0, len(plugins), 'expecting 0 plugin result, '
                                           'got {0}'.format(len(plugins)))
 
-    def test_plugins_list_with_filters(self):
-        self._upload_plugin().json
-        sec_plugin_id = self._upload_plugin().json['id']
-        filter_field = {'id': sec_plugin_id}
-        response = self.client.plugins.list(**filter_field)
-
-        self.assertEqual(len(response), 1, 'expecting 1 plugin result, '
-                                           'got {0}'.format(len(response)))
-        self.assertDictContainsSubset(filter_field, response[0],
-                                      'expecting filtered results having '
-                                      'filters {0}, got {1}'
-                                      .format(filter_field, response[0]))
+    def test_delete_plugin_not_found(self):
+        try:
+            self.client.plugins.delete('DUMMY_PLUGIN_ID')
+        except CloudifyClientError as e:
+            self.assertEquals('Plugin DUMMY_PLUGIN_ID not found', e.message)
+            self.assertEquals(404, e.status_code)
 
     def test_put_plugins_response_status(self):
         ok_response = self._upload_plugin(plugin_id='plugin')
