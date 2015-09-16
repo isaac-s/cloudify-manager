@@ -241,7 +241,6 @@ class NodeInstances(resources.NodeInstances):
 
 class Plugins(SecuredResource):
     """
-    POST = upload plugin.
     GET = list uploaded plugins
     """
     @swagger.operation(
@@ -336,15 +335,9 @@ class PluginsId(SecuredResource):
     GET = download previously uploaded plugin.
     """
     @swagger.operation(
-        responseClass='List[{0}]'.format(responses.NodeInstance.__name__),
-        nickname="listNodeInstances",
-        notes='Returns a node instances list for the optionally provided '
-              'filter parameters: {0}'
-        .format(models.DeploymentNodeInstance.fields),
-        parameters=_create_filter_params_list_description(
-            models.DeploymentNodeInstance.fields,
-            'node instances'
-        )
+        responseClass=responses.BlueprintState,
+        nickname="getById",
+        notes="Returns a plugin according to its ID."
     )
     @exceptions_handled
     @marshal_with(responses.Plugin.resource_fields)
@@ -355,14 +348,48 @@ class PluginsId(SecuredResource):
         plugin = get_storage_manager().get_plugin(plugin_id, include=_include)
         return responses.Plugin(**plugin.to_dict())
 
+    @swagger.operation(
+        responseClass=responses.Plugin,
+        nickname='upload',
+        notes='Submitted plugin should be an archive containing the directory '
+              ' which contains the plugin. The supported archive types are: '
+              '{archive_types}. The archive may be submitted via either URL '
+              'or by direct upload.'
+              .format(archive_types=SUPPORTED_ARCHIVE_TYPES),
+        parameters=[{'name': 'plugin_archive_url',
+                     'description': 'url of a plugin archive file',
+                     'required': False,
+                     'allowMultiple': False,
+                     'dataType': 'string',
+                     'paramType': 'query'},
+                    {'name': 'body',
+                     'description': 'Binary form of the tar '
+                                    'gzipped plugin directory',
+                     'required': True,
+                     'allowMultiple': False,
+                     'dataType': 'binary',
+                     'paramType': 'body'}],
+        consumes=["application/octet-stream"]
+    )
     @exceptions_handled
     @marshal_with(responses.Plugin.resource_fields)
     def put(self, plugin_id):
+        """
+        Upload a plugin
+        """
         return UploadedPluginsManager().receive_uploaded_data(plugin_id)
 
+    @swagger.operation(
+        responseClass=responses.Plugin,
+        nickname="deleteById",
+        notes="deletes a plugin according to its ID."
+    )
     @exceptions_handled
     @marshal_with(responses.Plugin.resource_fields)
     def delete(self, plugin_id):
+        """
+        Delete plugin by ID
+        """
         path = _get_plugin_path(plugin_id)
         shutil.rmtree(path, ignore_errors=True)
         plugin = get_storage_manager().delete_plugin(plugin_id)

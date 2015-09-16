@@ -36,17 +36,20 @@ class PluginsTest(BaseServerTestCase):
             self.assertEquals(404, e.status_code)
 
     def test_delete_plugin(self):
-        put_plugin_response = self._upload_plugin().json
-        plugins = self.client.plugins.list()
-        self.assertEqual(1, len(plugins), 'expecting 1 plugin result, '
-                                          'got {0}'.format(len(plugins)))
-        get_plugin_by_id_response = self.client.plugins.delete(
-            put_plugin_response['id'])
-        self.assertEquals(put_plugin_response,
-                          get_plugin_by_id_response)
-        plugins = self.client.plugins.list()
-        self.assertEqual(0, len(plugins), 'expecting 0 plugin result, '
-                                          'got {0}'.format(len(plugins)))
+        put_response = self._upload_plugin().json
+        plugins_list = self.client.plugins.list()
+        self.assertEqual(1, len(plugins_list),
+                         'expecting 1 plugin result, '
+                         'got {0}'.format(len(plugins_list)))
+        delete_response = self.client.plugins.delete(put_response['id'])
+
+        plugins_list = self.client.plugins.list()
+
+        self.assertEqual(0, len(plugins_list),
+                         'expecting 0 plugin result, '
+                         'got {0}'.format(len(plugins_list)))
+        self.assertEquals(put_response,
+                          delete_response)
 
     def test_delete_plugin_not_found(self):
         try:
