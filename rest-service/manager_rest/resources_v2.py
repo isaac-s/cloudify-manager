@@ -79,7 +79,6 @@ def _create_filter_params_list_description(parameters, list_type):
 
 
 class Blueprints(resources.Blueprints):
-    @paginate
     @swagger.operation(
         responseClass='List[{0}]'.format(responses_v2.BlueprintState.__name__),
         nickname="list",
@@ -94,6 +93,7 @@ class Blueprints(resources.Blueprints):
     @exceptions_handled
     @marshal_with(responses_v2.BlueprintState)
     @verify_and_create_filters(models.BlueprintState.fields)
+    @paginate
     def get(self, _include=None, filters=None, **kwargs):
         """
         List uploaded blueprints
@@ -182,7 +182,6 @@ class BlueprintsId(resources.BlueprintsId):
 
 
 class Executions(resources.Executions):
-    @paginate
     @swagger.operation(
         responseClass='List[{0}]'.format(responses_v2.Execution.__name__),
         nickname="list",
@@ -202,6 +201,7 @@ class Executions(resources.Executions):
     @exceptions_handled
     @marshal_with(responses_v2.Execution)
     @verify_and_create_filters(models.Execution.fields)
+    @paginate
     def get(self, _include=None, filters=None, **kwargs):
         """
         List executions
@@ -222,7 +222,6 @@ class Executions(resources.Executions):
 
 
 class Deployments(resources.Deployments):
-    @paginate
     @swagger.operation(
         responseClass='List[{0}]'.format(responses_v2.Deployment.__name__),
         nickname="list",
@@ -236,6 +235,7 @@ class Deployments(resources.Deployments):
     @exceptions_handled
     @marshal_with(responses_v2.Deployment)
     @verify_and_create_filters(models.Deployment.fields)
+    @paginate
     def get(self, _include=None, filters=None, **kwargs):
         """
         List deployments
@@ -246,7 +246,6 @@ class Deployments(resources.Deployments):
 
 
 class DeploymentModifications(resources.DeploymentModifications):
-    @paginate
     @swagger.operation(
         responseClass='List[{0}]'.format(
             responses_v2.DeploymentModification.__name__),
@@ -262,6 +261,7 @@ class DeploymentModifications(resources.DeploymentModifications):
     @exceptions_handled
     @marshal_with(responses_v2.DeploymentModification)
     @verify_and_create_filters(models.DeploymentModification.fields)
+    @paginate
     def get(self, _include=None, filters=None, **kwargs):
         """
         List deployment modifications
@@ -272,7 +272,6 @@ class DeploymentModifications(resources.DeploymentModifications):
 
 
 class Nodes(resources.Nodes):
-    @paginate
     @swagger.operation(
         responseClass='List[{0}]'.format(responses_v2.Node.__name__),
         nickname="listNodes",
@@ -286,6 +285,7 @@ class Nodes(resources.Nodes):
     @exceptions_handled
     @marshal_with(responses_v2.Node)
     @verify_and_create_filters(models.DeploymentNode.fields)
+    @paginate
     def get(self, _include=None, filters=None, **kwargs):
         """
         List nodes
@@ -296,7 +296,6 @@ class Nodes(resources.Nodes):
 
 
 class NodeInstances(resources.NodeInstances):
-    @paginate
     @swagger.operation(
         responseClass='List[{0}]'.format(responses_v2.NodeInstance.__name__),
         nickname="listNodeInstances",
@@ -311,6 +310,7 @@ class NodeInstances(resources.NodeInstances):
     @exceptions_handled
     @marshal_with(responses_v2.NodeInstance)
     @verify_and_create_filters(models.DeploymentNodeInstance.fields)
+    @paginate
     def get(self, _include=None, filters=None, **kwargs):
         """
         List node instances
