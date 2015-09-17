@@ -16,7 +16,6 @@ import os
 import shutil
 import tempfile
 import contextlib
-import logging
 
 from urllib2 import urlopen, URLError
 

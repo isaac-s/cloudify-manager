@@ -31,7 +31,7 @@ from manager_rest.models import (BlueprintState,
 STORAGE_INDEX_NAME = 'cloudify_storage'
 NODE_TYPE = 'node'
 NODE_INSTANCE_TYPE = 'node_instance'
-PLUGINS_TYPE = 'plugins'
+PLUGIN_TYPE = 'plugin'
 BLUEPRINT_TYPE = 'blueprint'
 DEPLOYMENT_TYPE = 'deployment'
 DEPLOYMENT_MODIFICATION_TYPE = 'deployment_modification'
@@ -230,7 +230,7 @@ class ESStorageManager(object):
                                     include=include)
 
     def get_plugins(self, include=None, filters=None):
-        return self._get_items_list(PLUGINS_TYPE,
+        return self._get_items_list(PLUGIN_TYPE,
                                     Plugin,
                                     filters=filters,
                                     include=include)
@@ -268,7 +268,7 @@ class ESStorageManager(object):
                                              fields=include)
 
     def get_plugin(self, plugin_id, include=None):
-        return self._get_doc_and_deserialize(PLUGINS_TYPE,
+        return self._get_doc_and_deserialize(PLUGIN_TYPE,
                                              plugin_id,
                                              Plugin,
                                              fields=include)
@@ -286,7 +286,7 @@ class ESStorageManager(object):
                                     execution.to_dict())
 
     def put_plugin(self, plugin_id, plugin):
-        self._put_doc_if_not_exists(PLUGINS_TYPE, str(plugin_id),
+        self._put_doc_if_not_exists(PLUGIN_TYPE, str(plugin_id),
                                     plugin.to_dict())
 
     def put_node(self, node):
@@ -308,8 +308,7 @@ class ESStorageManager(object):
                                 BlueprintState)
 
     def delete_plugin(self, plugin_id):
-        return self._delete_doc(PLUGINS_TYPE, plugin_id,
-                                Plugin)
+        return self._delete_doc(PLUGIN_TYPE, plugin_id, Plugin)
 
     def update_execution_status(self, execution_id, status, error):
         update_doc_data = {'status': status,

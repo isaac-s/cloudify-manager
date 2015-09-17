@@ -173,9 +173,7 @@ class Plugin(SerializableObject):
     """
     Represents a wheel plugin
     """
-    fields = {
-        'id', 'uploaded_at'
-    }
+    fields = {'id', 'uploaded_at'}
 
     def __init__(self, **kwargs):
         self.id = kwargs['id']
