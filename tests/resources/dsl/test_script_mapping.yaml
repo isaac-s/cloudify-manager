@@ -6,6 +6,9 @@ imports:
 node_templates:
     node:
         type: cloudify.nodes.Compute
+        properties:
+            agent_config:
+                install_method: remote
         interfaces:
             test:
                 op1: scripts/operations/op1.py
