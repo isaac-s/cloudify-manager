@@ -337,8 +337,7 @@ def create_celery_configuration(ctx, runner, agent_config, resource_loader):
     if distro=='Ubuntu':
         commands = ['sudo update-rc.d celeryd-{0} defaults'.format(agent_name)]
     elif distro=='redhat':
-        commands = ['sudo /sbin/chkconfig --add celeryd-{0}'.format(agent_name),
-                    'sudo /sbin/chkconfig celeryd-{0} on'.format(agent_name)]
+        commands = ['sudo /sbin/chkconfig --add celeryd-{0}'.format(agent_name)]
     else:
         ctx.logger.warn('Unrecognized distro ({0}) - will skip adding agent '
                         'startup script to init sequence'.format(agent_name))
